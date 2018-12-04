@@ -118,6 +118,8 @@ class category_bin extends base_bin {
             \backup::MODE_GENERAL,
             $user->id
         );
+        // Close the session so that the users other tabs in the same session are not blocked.
+        \core\session\manager::write_close();
         $controller->execute_plan();
 
         // Grab the result.
@@ -259,6 +261,8 @@ class category_bin extends base_bin {
             }
         }
 
+        // Close the session so that the users other tabs in the same session are not blocked.
+        \core\session\manager::write_close();
         // Run the import.
         $controller->execute_plan();
 
