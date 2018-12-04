@@ -124,29 +124,38 @@ abstract class backup_structure_dbops extends backup_dbops {
                    AND component = ?';
         $params = array($contextid, $component);
 
+        $cachekey = $backupid . '_' . $contextid . '_' . $component;
+
         if (!is_null($filearea)) { // Add filearea to query and params if necessary
             $sql .= ' AND filearea = ?';
             $params[] = $filearea;
+            $cachekey = $cachekey . '_' . $filearea;
         }
 
         if (!is_null($itemid)) { // Add itemid to query and params if necessary
             $sql .= ' AND itemid = ?';
             $params[] = $itemid;
+            $cachekey = $cachekey . '_' . $itemid;
         }
         if ($progress) {
             $progress->start_progress('');
         }
-        $rs = $DB->get_recordset_sql($sql, $params);
-        foreach ($rs as $record) {
-            if ($progress) {
-                $progress->progress();
+
+        $cache = cache::make('core', 'backup_annotated_files');
+        if (!$cache->get($cachekey)) {
+            $rs = $DB->get_recordset_sql($sql, $params);
+            foreach ($rs as $record) {
+                if ($progress) {
+                    $progress->progress();
+                }
+                self::insert_backup_ids_record($backupid, 'file', $record->id);
             }
-            self::insert_backup_ids_record($backupid, 'file', $record->id);
+            $rs->close();
+            $cache->set($cachekey, true);
         }
         if ($progress) {
             $progress->end_progress();
         }
-        $rs->close();
     }
 
     /**

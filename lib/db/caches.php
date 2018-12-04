@@ -384,4 +384,11 @@ $definitions = array(
         'simpledata' => true,
         'ttl' => 1800
     ),
+
+    // Caches already processed backup annotated files.
+    'backup_annotated_files' => array(
+        'mode' => cache_store::MODE_REQUEST,
+        'simplekeys' => true,
+        'simpledata' => true
+    ),
 );
