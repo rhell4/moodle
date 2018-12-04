@@ -110,6 +110,8 @@ if ($backup->get_stage() == backup_ui::STAGE_SCHEMA && !$previous) {
     $twobars = false;
 }
 $backup->get_controller()->set_progress($slowprogress);
+// Close the session so that the users other tabs in the same session are not blocked.
+\core\session\manager::write_close();
 $backup->process();
 
 if ($backup->enforce_changed_dependencies()) {

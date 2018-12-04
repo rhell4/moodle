@@ -78,6 +78,8 @@ if (!($bc = backup_ui::load_controller($backupid))) {
 
 // Prepare the import UI
 $backup = new import_ui($bc, array('importid'=>$importcourse->id, 'target'=>$restoretarget));
+// Close the session so that the users other tabs in the same session are not blocked.
+\core\session\manager::write_close();
 // Process the current stage
 $backup->process();
 
