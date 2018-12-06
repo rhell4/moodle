@@ -141,6 +141,7 @@ abstract class backup_structure_dbops extends backup_dbops {
             $progress->start_progress('');
         }
 
+        $cachekey = str_replace(' ', '_', $cachekey);
         $cache = cache::make('core', 'backup_annotated_files');
         if (!$cache->get($cachekey)) {
             $rs = $DB->get_recordset_sql($sql, $params);
