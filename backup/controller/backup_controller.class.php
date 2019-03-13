@@ -74,8 +74,9 @@ class backup_controller extends base_controller {
      * @param bool $interactive Whether this backup will require user interaction; backup::INTERACTIVE_YES or INTERACTIVE_NO
      * @param int $mode One of backup::MODE_GENERAL, MODE_IMPORT, MODE_SAMESITE, MODE_HUB, MODE_AUTOMATED
      * @param int $userid The id of the user making the backup
+     * @param bool $releasesession Whether this backup should release the session; backup::RELEASESESSION_YES or backup::RELEASESESSION_NO
      */
-    public function __construct($type, $id, $format, $interactive, $mode, $userid){
+    public function __construct($type, $id, $format, $interactive, $mode, $userid, $releasesession = backup::RELEASESESSION_NO) {
         $this->type = $type;
         $this->id   = $id;
         $this->courseid = backup_controller_dbops::get_courseid_from_type_id($this->type, $this->id);
@@ -83,6 +84,7 @@ class backup_controller extends base_controller {
         $this->interactive = $interactive;
         $this->mode = $mode;
         $this->userid = $userid;
+        $this->releasesession = $releasesession;
 
         // Apply some defaults
         $this->execution = backup::EXECUTION_INMEDIATE;
@@ -297,6 +299,16 @@ class backup_controller extends base_controller {
     }
 
     /**
+     * Returns the set value of releasesession.
+     * This is used to indicate if the session should be closed during the backup.
+     *
+     * @return int Indicates whether the session should be released.
+     */
+    public function get_releasesession() {
+        return $this->releasesession;
+    }
+
+    /**
      * @return backup_plan
      */
     public function get_plan() {
@@ -311,6 +323,10 @@ class backup_controller extends base_controller {
         // Basic/initial prevention against time/memory limits
         core_php_time_limit::raise(1 * 60 * 60); // 1 hour for 1 course initially granted
         raise_memory_limit(MEMORY_EXTRA);
+        // Release the session so other tabs in the same session are not blocked.
+        if ($this->get_releasesession() === backup::RELEASESESSION_YES) {
+            \core\session\manager::write_close();
+        }
         // If this is not a course backup, inform the plan we are not
         // including all the activities for sure. This will affect any
         // task/step executed conditionally to stop including information

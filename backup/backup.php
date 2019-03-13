@@ -97,7 +97,7 @@ raise_memory_limit(MEMORY_EXTRA);
 
 if (!($bc = backup_ui::load_controller($backupid))) {
     $bc = new backup_controller($type, $id, backup::FORMAT_MOODLE,
-                            backup::INTERACTIVE_YES, backup::MODE_GENERAL, $USER->id);
+                            backup::INTERACTIVE_YES, backup::MODE_GENERAL, $USER->id, backup::RELEASESESSION_YES);
 }
 $backup = new backup_ui($bc);
 
