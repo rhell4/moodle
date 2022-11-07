@@ -53,7 +53,13 @@ class observer {
     public static function store(\core\event\base $event) {
         global $DB;
 
-        if (!isloggedin() or \core\session\manager::is_loggedinas() or isguestuser()) {
+        $plugininfo = \core_plugin_manager::instance()->get_plugin_info('block_recentlyaccesseditems');
+        $enabled = $plugininfo->is_enabled();
+        $isloggedin = isloggedin();
+        $isloggedinas = \core\session\manager::is_loggedinas();
+        $isguestuser = isguestuser();
+
+        if (!$enabled || !$isloggedin || $isloggedinas || $isguestuser) {
             // No access tracking.
             return;
         }

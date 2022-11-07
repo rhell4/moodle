@@ -75,6 +75,33 @@ class observer_test extends \advanced_testcase {
         $records = $DB->count_records($this->table, array());
         $this->assertEquals(0, $records);
 
+        // Start with block disabled.
+        $class = \core_plugin_manager::resolve_plugininfo_class('block');
+        $class::enable_plugin('recentlyaccesseditems', false);
+
+        // Teacher access forum activity while block is disabled.
+        $this->setUser($this->teacher);
+        $event = \mod_forum\event\course_module_viewed::create(array('context' => \context_module::instance($this->forum->cmid),
+                'objectid' => $this->forum->id));
+        $event->trigger();
+
+        // Student access chat activity while block is disabled.
+        $this->setUser($this->student);
+        $event1 = \mod_chat\event\course_module_viewed::create(array('context' => \context_module::instance($this->chat->cmid),
+                'objectid' => $this->chat->id));
+        $event1->trigger();
+
+        $records = $DB->count_records($this->table, array('userid' => $this->teacher->id, 'courseid' => $this->course->id,
+                'cmid' => $this->forum->cmid));
+        $this->assertEquals(0, $records);
+
+        $records = $DB->count_records($this->table, array('userid' => $this->student->id, 'courseid' => $this->course->id, 'cmid' =>
+                $this->chat->cmid));
+        $this->assertEquals(0, $records);
+
+        // Try again but this time with the block enabled.
+        $class::enable_plugin('recentlyaccesseditems', true);
+
         // Teacher access forum activity.
         $this->setUser($this->teacher);
         $event = \mod_forum\event\course_module_viewed::create(array('context' => \context_module::instance($this->forum->cmid),
