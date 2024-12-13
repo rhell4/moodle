@@ -2041,7 +2041,10 @@ class coursecat_helper {
         }
         $name = format_string(get_course_display_name_for_list($course), true, $options);
         if (!empty($this->searchcriteria['search'])) {
-            $name = highlight($this->searchcriteria['search'], $name);
+            // The course name we are highlighting is a formatted string,
+            // so the search term should also be a formatted string to match.
+            $search = format_string($this->searchcriteria['search'], true, $options);
+            $name = highlight($search, $name);
         }
         return $name;
     }
