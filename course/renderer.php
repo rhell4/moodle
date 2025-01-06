@@ -2018,7 +2018,12 @@ class coursecat_helper {
         $summary = file_rewrite_pluginfile_urls($course->summary, 'pluginfile.php', $context->id, 'course', 'summary', null);
         $summary = format_text($summary, $course->summaryformat, $options);
         if (!empty($this->searchcriteria['search'])) {
-            $summary = highlight($this->searchcriteria['search'], $summary);
+            // The course summary we are highlighting might have encoded html entities or a mix of both decode and encoded entities.
+            // If we decode both the summary and search term, then encode just the ampersands, we should have matching strings,
+            // and any ampersands in the search term shouldn't break any html entities in the summary when being highlighted.
+            $summary = replace_ampersands_not_followed_by_entity(html_entity_decode($summary));
+            $search = replace_ampersands_not_followed_by_entity(html_entity_decode($this->searchcriteria['search']));
+            $summary = highlight($search, $summary);
         }
         return $summary;
     }
@@ -2037,7 +2042,10 @@ class coursecat_helper {
         }
         $name = format_string(get_course_display_name_for_list($course), true, $options);
         if (!empty($this->searchcriteria['search'])) {
-            $name = highlight($this->searchcriteria['search'], $name);
+            // The course name we are highlighting is a formatted string,
+            // so the search term should also be a formatted string to match.
+            $search = format_string($this->searchcriteria['search'], true, $options);
+            $name = highlight($search, $name);
         }
         return $name;
     }
